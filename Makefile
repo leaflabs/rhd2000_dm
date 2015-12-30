@@ -1,58 +1,36 @@
-###############################################################################
-#
-# ICARUS VERILOG & GTKWAVE MAKEFILE
-# MADE BY WILLIAM GIBB FOR HACDC
-# williamgibb@gmail.com
-# 
-# USE THE FOLLOWING COMMANDS WITH THIS MAKEFILE
-#	"make check" - compiles your verilog design - good for checking code
-#	"make simulate" - compiles your design+TB & simulates your design
-#	"make display" - compiles, simulates and displays waveforms
-# 
-###############################################################################
-#
-# CHANGE THESE THREE LINES FOR YOUR DESIGN
-#
-#TOOL INPUT
+## Copyright (c) 2015 LeafLabs LLC
+## Author: Charlie Lamantia
+## Date: December 2015
 
-SRC := rhd2000_dm.v
-SRC += llLib.v
+## Makefile for use with iverilog and gtkwave
 
-TESTBENCH = rhd2000_dm_tb.v
 
-#THIS NEEDS TO MATCH THE OUTPUT FILE
-#FROM YOUR TESTBENCH
-TBOUTPUT = test.vcd
-###############################################################################
-# BE CAREFUL WHEN CHANGING ITEMS BELOW THIS LINE
-###############################################################################
-#TOOLS
-COMPILER = iverilog
-SIMULATOR = vvp
-VIEWER = gtkwave
-#TOOL OPTIONS
-COFLAGS = -v -o
-SFLAGS = -v
+# Verilog source files
+VER := rhd2000_dm.v
+VER += llLib.v
 
-#SIMULATOR OUTPUT TYPE
-SOUTPUT = -lxt
+# Testbench
+TB := rhd2000_dm_tb.v
 
-#TOOL OUTPUT
-#COMPILER OUTPUT
-COUTPUT = compiler.out
-###############################################################################
-#MAKE DIRECTIVES
-check : $(TESTBENCH) $(SRC)
-	$(COMPILER) -v $(SRC)
+# Testbench output as defined by "$dumpfile("test.vcd");"
+# called in testbench "initial begin"
+TBO = test.vcd
 
-simulate: $(COUTPUT)
-	$(SIMULATOR) $(SFLAGS) $(COUTPUT) $(SOUTPUT)
+# Compiled output from iverilog
+CO = c.o
 
-display: $(TBOUTPUT)
-	$(VIEWER) $(TBOUTPUT) &
-#MAKE DEPENDANCIES
-$(TBOUTPUT): $(COUTPUT)
-	$(SIMULATOR) $(SOPTIONS) $(COUTPUT) $(SOUTPUT)
 
-$(COUTPUT): $(TESTBENCH) $(SRC)
-	$(COMPILER) $(COFLAGS) $(COUTPUT) $(TESTBENCH) $(SRC)
+# make targets
+simulate: $(CO)
+	vvp -v $(CO) -lxt
+
+display: $(TBO)
+	gtkwave $(TBO) &
+
+
+# make dependancies
+$(TBO): $(CO)
+	vvp $(CO) -lxt
+
+$(CO): $(TB) $(VER)
+	iverilog -v -o $(CO) $(TB) $(VER)
