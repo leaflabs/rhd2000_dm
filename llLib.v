@@ -10,12 +10,31 @@
 `ifndef __LL_LIB__
 `define __LL_LIB__
 
+`timescale 1 ps / 1 ps
+
+`define PI 3.1415926535
+
 module llLib();
+	
+	// generate a sin value
+	function real SIN;
+		input real 		f; // frequency (MHz)
+		input integer 	nBits;
+
+		integer	A;
+		real 	t;
+		begin
+			A = 2 ** nBits;
+			t = $realtime / 1000000000.0;
+
+			SIN = A * $sin(t * 2 * `PI * f * 1000000.0);;
+		end
+	endfunction
 
 	// generate a random integer within a range
-	function [31:0] RANDRANGE;
-        input [31:0] max;
-        input [31:0] min;
+	function integer RANDRANGE;
+        input integer max;
+        input integer min;
 
         begin
             RANDRANGE = ($unsigned($random) % (max - min)) + min;
@@ -24,4 +43,4 @@ module llLib();
 
 endmodule
 
-`endif
+`endif // __LL_LIB__
